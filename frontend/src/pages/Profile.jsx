@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { api } from '../services/api'
 
 const Profile = () => {
     const [user, setUser] = useState(null)
@@ -15,44 +16,22 @@ const Profile = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                // Para desenvolvimento, usar dados mockados
-                const mockUser = {
-                    _id: '1',
-                    username: 'usuarioteste',
-                    email: 'teste@exemplo.com',
-                    createdAt: new Date().toISOString()
-                }
+                const token = localStorage.getItem('token')
 
-                const mockReviews = [
-                    {
-                        _id: '1',
-                        gameTitle: 'The Legend of Zelda: Breath of the Wild',
-                        rating: 5,
-                        reviewText: 'Um dos melhores jogos já criados. Mundo aberto incrível!',
-                        createdAt: new Date(Date.now() - 86400000).toISOString() // 1 dia atrás
-                    },
-                    {
-                        _id: '2',
-                        gameTitle: 'Elden Ring',
-                        rating: 4,
-                        reviewText: 'Difícil mas recompensador. Gráficos espetaculares.',
-                        createdAt: new Date(Date.now() - 172800000).toISOString() // 2 dias atrás
-                    },
-                    {
-                        _id: '3',
-                        gameTitle: 'Cyberpunk 2077',
-                        rating: 3,
-                        reviewText: 'Melhorou muito desde o lançamento. História incrível!',
-                        createdAt: new Date(Date.now() - 259200000).toISOString() // 3 dias atrás
-                    }
-                ]
+                // Buscar dados do usuário
+                const userResponse = await api.getMe(token)
 
-                setUser(mockUser)
-                setReviews(mockReviews)
+                // Buscar avaliações do usuário
+                const reviewsResponse = await api.getUserReviews(userResponse.data._id)
+
+                setUser(userResponse.data)
+                setReviews(reviewsResponse.data)
 
                 // Calcular estatísticas
-                const totalReviews = mockReviews.length
-                const averageRating = mockReviews.reduce((acc, review) => acc + review.rating, 0) / totalReviews
+                const totalReviews = reviewsResponse.data.length
+                const averageRating = totalReviews > 0
+                    ? reviewsResponse.data.reduce((acc, review) => acc + review.rating, 0) / totalReviews
+                    : 0
 
                 setStats({
                     totalReviews,
@@ -61,23 +40,6 @@ const Profile = () => {
                 })
 
                 setLoading(false)
-
-                // Quando o backend estiver pronto, use este código:
-                /*
-                const token = localStorage.getItem('token')
-
-                // Buscar dados do usuário
-                const userResponse = await axios.get('http://localhost:5000/api/users/me', {
-                  headers: { 'x-auth-token': token }
-                })
-
-                // Buscar avaliações do usuário
-                const reviewsResponse = await axios.get(`http://localhost:5000/api/reviews/user/${userResponse.data._id}`)
-
-                setUser(userResponse.data)
-                setReviews(reviewsResponse.data)
-                setLoading(false)
-                */
             } catch (err) {
                 setError('Erro ao carregar dados do perfil')
                 setLoading(false)
@@ -94,19 +56,11 @@ const Profile = () => {
         }
 
         try {
-            // Para desenvolvimento, apenas remover da lista local
+            const token = localStorage.getItem('token')
+            await api.deleteReview(reviewId, token)
+
             setReviews(reviews.filter(review => review._id !== reviewId))
             alert('Avaliação excluída com sucesso!')
-
-            // Quando o backend estiver pronto, use este código:
-            /*
-            const token = localStorage.getItem('token')
-            await axios.delete(`http://localhost:5000/api/reviews/${reviewId}`, {
-              headers: { 'x-auth-token': token }
-            })
-
-            setReviews(reviews.filter(review => review._id !== reviewId))
-            */
         } catch (err) {
             setError('Erro ao excluir avaliação')
             console.error('Erro ao excluir avaliação:', err)

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { api } from '../services/api'
 
 const AddReview = () => {
     const [formData, setFormData] = useState({
@@ -25,32 +26,12 @@ const AddReview = () => {
         setLoading(true)
 
         try {
-            // Para desenvolvimento, simule uma criação bem-sucedida
-            console.log('Criando avaliação:', formData)
-
-            // Simular criação de avaliação
-            setTimeout(() => {
-                setLoading(false)
-                alert('Avaliação criada com sucesso!')
-                navigate('/')
-            }, 1000)
-
-            // Quando o backend estiver pronto, use este código:
-            /*
             const token = localStorage.getItem('token')
-            const response = await axios.post(
-              'http://localhost:5000/api/reviews',
-              formData,
-              {
-                headers: {
-                  'x-auth-token': token
-                }
-              }
-            )
+            await api.createReview(null, formData, token)
 
             setLoading(false)
+            alert('Avaliação criada com sucesso!')
             navigate('/')
-            */
         } catch (err) {
             setLoading(false)
             setError(err.response?.data?.message || 'Erro ao criar avaliação')

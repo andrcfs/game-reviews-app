@@ -1,5 +1,5 @@
-import axios from 'axios'
 import { useEffect, useState } from 'react'
+import { api } from '../services/api'
 
 const Home = () => {
     const [reviews, setReviews] = useState([])
@@ -9,8 +9,7 @@ const Home = () => {
     useEffect(() => {
         const fetchReviews = async () => {
             try {
-                // Em produção, use sua URL real da API
-                const response = await axios.get('http://localhost:5000/api/reviews')
+                const response = await api.getAllReviews()
                 setReviews(response.data)
                 setLoading(false)
             } catch (err) {
@@ -20,43 +19,7 @@ const Home = () => {
             }
         }
 
-        // Para desenvolvimento, usar dados mockados
-        const mockReviews = [
-            {
-                _id: '1',
-                gameTitle: 'The Legend of Zelda: Breath of the Wild',
-                rating: 5,
-                reviewText: 'Um dos melhores jogos já criados. Mundo aberto incrível!',
-                gameImage: 'https://via.placeholder.com/150',
-                user: { username: 'gamer123' },
-                createdAt: new Date().toISOString()
-            },
-            {
-                _id: '2',
-                gameTitle: 'Elden Ring',
-                rating: 4,
-                reviewText: 'Difícil mas recompensador. Gráficos espetaculares.',
-                gameImage: 'https://via.placeholder.com/150',
-                user: { username: 'rpgfan' },
-                createdAt: new Date().toISOString()
-            },
-            {
-                _id: '3',
-                gameTitle: 'Cyberpunk 2077',
-                rating: 3,
-                reviewText: 'Melhorou muito desde o lançamento. História incrível!',
-                gameImage: 'https://via.placeholder.com/150',
-                user: { username: 'nightcity' },
-                createdAt: new Date().toISOString()
-            }
-        ]
-
-        // Usar dados mockados por enquanto
-        setReviews(mockReviews)
-        setLoading(false)
-
-        // Quando o backend estiver pronto, descomentar:
-        // fetchReviews()
+        fetchReviews()
     }, [])
 
     if (loading) {

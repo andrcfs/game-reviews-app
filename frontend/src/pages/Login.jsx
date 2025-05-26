@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { api } from '../services/api'
 
 const Login = ({ setIsLoggedIn }) => {
     const [formData, setFormData] = useState({
@@ -23,41 +24,15 @@ const Login = ({ setIsLoggedIn }) => {
         setLoading(true)
 
         try {
-            // Para desenvolvimento, simule um login bem-sucedido
-            console.log('Tentando fazer login com:', formData)
+            const response = await api.login(formData)
 
-            // Simular um login bem-sucedido
-            setTimeout(() => {
-                // Dados mockados
-                const mockResponse = {
-                    token: 'mock-token-12345',
-                    user: {
-                        _id: '1',
-                        username: 'usuarioteste',
-                        email: formData.email
-                    }
-                }
-
-                // Salvar no localStorage
-                localStorage.setItem('token', mockResponse.token)
-                localStorage.setItem('user', JSON.stringify(mockResponse.user))
-
-                setIsLoggedIn(true)
-                setLoading(false)
-                navigate('/')
-            }, 1000)
-
-            // Quando o backend estiver pronto, use este código:
-            /*
-            const response = await axios.post('http://localhost:5000/api/users/login', formData)
-
+            // Salvar no localStorage
             localStorage.setItem('token', response.data.token)
             localStorage.setItem('user', JSON.stringify(response.data.user))
 
             setIsLoggedIn(true)
             setLoading(false)
             navigate('/')
-            */
         } catch (err) {
             setLoading(false)
             setError(err.response?.data?.message || 'Erro ao fazer login')

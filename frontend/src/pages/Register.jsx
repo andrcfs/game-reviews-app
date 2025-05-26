@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { api } from '../services/api'
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -37,27 +38,15 @@ const Register = () => {
         setLoading(true)
 
         try {
-            // Para desenvolvimento, simule um registro bem-sucedido
-            console.log('Tentando registrar usuário:', formData)
-
-            // Simular um registro bem-sucedido
-            setTimeout(() => {
-                setLoading(false)
-                alert('Usuário registrado com sucesso! Faça login para continuar.')
-                navigate('/login')
-            }, 1000)
-
-            // Quando o backend estiver pronto, use este código:
-            /*
-            const response = await axios.post('http://localhost:5000/api/users/register', {
-              username: formData.username,
-              email: formData.email,
-              password: formData.password
+            await api.register({
+                username: formData.username,
+                email: formData.email,
+                password: formData.password
             })
 
             setLoading(false)
+            alert('Usuário registrado com sucesso! Faça login para continuar.')
             navigate('/login')
-            */
         } catch (err) {
             setLoading(false)
             setError(err.response?.data?.message || 'Erro ao registrar usuário')
