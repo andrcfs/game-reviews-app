@@ -47,6 +47,10 @@ public class Review {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    // Default constructor for JPA
+    public Review() {
+    }
+
     public Review(Integer rating, String comment, User user, Game game) {
         this.rating = rating;
         this.comment = comment;

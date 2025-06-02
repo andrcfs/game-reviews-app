@@ -27,7 +27,29 @@ const AddReview = () => {
 
         try {
             const token = localStorage.getItem('token')
-            await api.createReview(null, formData, token)
+
+            // First, create or find the game
+            let gameResponse
+            try {
+                gameResponse = await api.createGame({
+                    name: formData.gameTitle,
+                    imageUrl: formData.gameImage
+                })
+            } catch (gameError) {
+                setLoading(false)
+                setError('Erro ao criar/encontrar o jogo')
+                console.error('Erro ao criar jogo:', gameError)
+                return
+            }
+
+            // Create the review with the correct format
+            const reviewRequest = {
+                rating: parseInt(formData.rating),
+                comment: formData.reviewText,
+                gameId: gameResponse.id
+            }
+
+            await api.createReview(reviewRequest, token)
 
             setLoading(false)
             alert('Avaliação criada com sucesso!')

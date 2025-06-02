@@ -6,10 +6,27 @@ const apiClient = axios.create({
     baseURL: API_BASE_URL,
 });
 
+// Helper function to decode JWT and extract user ID
+const getUserIdFromToken = (token) => {
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.sub || payload.userId || payload.id;
+    } catch (error) {
+        console.error('Error decoding token:', error);
+        return null;
+    }
+};
+
 // Helper function to add auth headers
-const withAuth = (token) => ({
-    headers: { Authorization: `Bearer ${token}` }
-});
+const withAuth = (token) => {
+    const userId = getUserIdFromToken(token);
+    return {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'User-ID': userId
+        }
+    };
+};
 
 export const api = {
     // Games
@@ -25,10 +42,8 @@ export const api = {
     // Reviews
     getReviews: (gameId) => apiClient.get(`/games/${gameId}/reviews`).then(res => res.data),
     getAllReviews: () => apiClient.get('/reviews'),
-    createReview: (gameId, review, token) =>
-        token
-            ? apiClient.post('/reviews', review, withAuth(token))
-            : apiClient.post(`/games/${gameId}/reviews`, review).then(res => res.data),
+    createReview: (reviewRequest, token) =>
+        apiClient.post('/reviews', reviewRequest, withAuth(token)).then(res => res.data),
     getUserReviews: (userId) => apiClient.get(`/reviews/user/${userId}`),
     deleteReview: (reviewId, token) => apiClient.delete(`/reviews/${reviewId}`, withAuth(token))
 };
