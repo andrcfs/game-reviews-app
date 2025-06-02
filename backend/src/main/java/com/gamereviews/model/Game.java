@@ -7,7 +7,18 @@ import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -29,8 +40,10 @@ public class Game {
     @Size(max = 50)
     private String genre;
 
-    @Size(max = 50)
-    private String platform;
+    @ElementCollection
+    @CollectionTable(name = "game_platforms", joinColumns = @JoinColumn(name = "game_id"))
+    @Column(name = "platform")
+    private Set<String> platforms = new HashSet<>();
 
     @Size(max = 200)
     private String imageUrl;
@@ -45,11 +58,11 @@ public class Game {
     public Game() {
     }
 
-    public Game(String title, String description, String genre, String platform, String imageUrl) {
+    public Game(String title, String description, String genre, Set<String> platforms, String imageUrl) {
         this.title = title;
         this.description = description;
         this.genre = genre;
-        this.platform = platform;
+        this.platforms = platforms;
         this.imageUrl = imageUrl;
     }
 
@@ -86,12 +99,12 @@ public class Game {
         this.genre = genre;
     }
 
-    public String getPlatform() {
-        return platform;
+    public Set<String> getPlatforms() {
+        return platforms;
     }
 
-    public void setPlatform(String platform) {
-        this.platform = platform;
+    public void setPlatforms(Set<String> platforms) {
+        this.platforms = platforms;
     }
 
     public String getImageUrl() {

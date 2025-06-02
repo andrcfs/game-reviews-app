@@ -20,17 +20,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(SignUpRequest signUpRequest) {
-        // Check if username already exists
         if (existsByUsername(signUpRequest.getUsername())) {
-            throw new RuntimeException("Username já está em uso!");
+            throw new RuntimeException("Nome de usuário já existe!");
         }
 
-        // Check if email already exists
         if (existsByEmail(signUpRequest.getEmail())) {
             throw new RuntimeException("Email já está em uso!");
         }
 
-        // Create new user
         User user = new User();
         user.setUsername(signUpRequest.getUsername());
         user.setEmail(signUpRequest.getEmail());
@@ -47,6 +44,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findByEmail(String email) {
         return userRepository.findByEmail(email).orElse(null);
+    }
+
+    @Override
+    public User findById(Long id) {
+        return userRepository.findById(id).orElse(null);
     }
 
     @Override
