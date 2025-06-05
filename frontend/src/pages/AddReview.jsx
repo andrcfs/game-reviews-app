@@ -1,17 +1,51 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../services/api'
 
 const AddReview = () => {
     const [formData, setFormData] = useState({
-        gameTitle: '',
+        gameId: '',
         rating: 5,
-        reviewText: '',
-        gameImage: ''
+        reviewText: ''
     })
+    const [games, setGames] = useState([])
+    const [searchTerm, setSearchTerm] = useState('')
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
+
+    // Load games on component mount
+    useEffect(() => {
+        loadGames()
+    }, [])
+
+    // Load games when search term changes
+    useEffect(() => {
+        if (searchTerm.trim()) {
+            searchGames(searchTerm)
+        } else {
+            loadGames()
+        }
+    }, [searchTerm])
+
+    const loadGames = async () => {
+        try {
+            const gamesData = await api.getAllGames()
+            setGames(gamesData)
+        } catch (err) {
+            console.error('Error loading games:', err)
+            setError('Failed to load games')
+        }
+    }
+
+    const searchGames = async (term) => {
+        try {
+            const gamesData = await api.searchGamesByTitle(term)
+            setGames(gamesData)
+        } catch (err) {
+            console.error('Error searching games:', err)
+        }
+    }
 
     const handleChange = (e) => {
         setFormData({
@@ -20,33 +54,28 @@ const AddReview = () => {
         })
     }
 
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value)
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         setError('')
+
+        if (!formData.gameId) {
+            setError('Please select a game to review')
+            return
+        }
+
         setLoading(true)
 
         try {
             const token = localStorage.getItem('token')
 
-            // First, create or find the game
-            let gameResponse
-            try {
-                gameResponse = await api.createGame({
-                    name: formData.gameTitle,
-                    imageUrl: formData.gameImage
-                })
-            } catch (gameError) {
-                setLoading(false)
-                setError('Erro ao criar/encontrar o jogo')
-                console.error('Erro ao criar jogo:', gameError)
-                return
-            }
-
-            // Create the review with the correct format
             const reviewRequest = {
                 rating: parseInt(formData.rating),
                 comment: formData.reviewText,
-                gameId: gameResponse.id
+                gameId: formData.gameId
             }
 
             await api.createReview(reviewRequest, token)
@@ -61,6 +90,9 @@ const AddReview = () => {
         }
     }
 
+    // Find the selected game details
+    const selectedGame = formData.gameId ? games.find(game => game.id === parseInt(formData.gameId)) : null
+
     return (
         <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
             <h1 className="text-2xl font-bold mb-6 text-center">Adicionar Avaliação</h1>
@@ -73,19 +105,41 @@ const AddReview = () => {
 
             <form onSubmit={handleSubmit}>
                 <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="gameTitle">
-                        Nome do Jogo *
+                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                        Buscar Jogo *
                     </label>
                     <input
                         type="text"
-                        id="gameTitle"
-                        name="gameTitle"
-                        value={formData.gameTitle}
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        className="input-field mb-2"
+                        placeholder="Digite o nome do jogo..."
+                    />
+
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="gameId">
+                        Selecionar Jogo *
+                    </label>
+                    <select
+                        id="gameId"
+                        name="gameId"
+                        value={formData.gameId}
                         onChange={handleChange}
                         className="input-field"
-                        placeholder="Ex: The Legend of Zelda: Breath of the Wild"
                         required
-                    />
+                    >
+                        <option value="">Selecione um jogo</option>
+                        {games.map(game => (
+                            <option key={game.id} value={game.id}>
+                                {game.title}
+                            </option>
+                        ))}
+                    </select>
+
+                    <div className="mt-2 text-sm">
+                        <a href="/add-game" className="text-blue-500 hover:underline">
+                            Não encontrou o jogo? Adicione um novo jogo aqui
+                        </a>
+                    </div>
                 </div>
 
                 <div className="mb-4">
@@ -106,21 +160,6 @@ const AddReview = () => {
                         <option value={4}>4 - Bom</option>
                         <option value={5}>5 - Excelente</option>
                     </select>
-                </div>
-
-                <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="gameImage">
-                        URL da Imagem (opcional)
-                    </label>
-                    <input
-                        type="url"
-                        id="gameImage"
-                        name="gameImage"
-                        value={formData.gameImage}
-                        onChange={handleChange}
-                        className="input-field"
-                        placeholder="https://exemplo.com/imagem.jpg"
-                    />
                 </div>
 
                 <div className="mb-6">
@@ -145,7 +184,7 @@ const AddReview = () => {
                 <div className="mb-4 p-4 bg-gray-50 rounded-lg">
                     <h3 className="font-bold mb-2">Preview da Avaliação:</h3>
                     <div className="border-l-4 border-blue-500 pl-4">
-                        <h4 className="font-semibold text-lg">{formData.gameTitle || 'Nome do Jogo'}</h4>
+                        <h4 className="font-semibold text-lg">{selectedGame?.title || 'Nome do Jogo'}</h4>
                         <div className="flex items-center my-2">
                             <span className="text-yellow-500 mr-2">
                                 {'★'.repeat(parseInt(formData.rating))}{'☆'.repeat(5 - parseInt(formData.rating))}

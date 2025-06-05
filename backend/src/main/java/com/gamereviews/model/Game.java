@@ -45,7 +45,7 @@ public class Game {
     @Column(name = "platform")
     private Set<String> platforms = new HashSet<>();
 
-    @Size(max = 200)
+    @Size(max = 500)
     private String imageUrl;
 
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 import Navbar from './components/Navbar'
+import AddGame from './pages/AddGame'
 import AddReview from './pages/AddReview'
 import Home from './pages/Home'
 import Login from './pages/Login'
@@ -20,6 +21,7 @@ function App() {
             <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
             <Route path="/register" element={<Register />} />
             <Route path="/add-review" element={<AddReview />} />
+            <Route path="/add-game" element={<AddGame />} />
             <Route path="/profile" element={<Profile />} />
           </Routes>
         </main>

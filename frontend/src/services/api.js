@@ -30,9 +30,15 @@ const withAuth = (token) => {
 
 export const api = {
     // Games
-    getGames: () => apiClient.get('/games').then(res => res.data),
+    getAllGames: () => apiClient.get('/games').then(res => res.data),
+    getGames: () => apiClient.get('/games').then(res => res.data), // Alias for compatibility
     getGame: (id) => apiClient.get(`/games/${id}`).then(res => res.data),
-    createGame: (game) => apiClient.post('/games', game).then(res => res.data),
+    getGameById: (id) => apiClient.get(`/games/${id}`).then(res => res.data), // Alias
+    createGame: (game, token) => apiClient.post('/games', game, withAuth(token)).then(res => res.data),
+    createGameComplete: (gameData, token) => apiClient.post('/games', gameData, withAuth(token)).then(res => res.data),
+    searchGames: (title) => apiClient.get(`/games/search?title=${encodeURIComponent(title)}`).then(res => res.data),
+    searchGamesByTitle: (title) => apiClient.get(`/games/search?title=${encodeURIComponent(title)}`).then(res => res.data),
+    getGamesByGenre: (genre) => apiClient.get(`/games/genre/${encodeURIComponent(genre)}`).then(res => res.data),
 
     // Users
     register: (userData) => apiClient.post('/users/register', userData),

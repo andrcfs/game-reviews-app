@@ -19,6 +19,7 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }) => {
                     {isLoggedIn ? (
                         <>
                             <Link to="/add-review" className="hover:text-gray-300">Adicionar Avaliação</Link>
+                            <Link to="/add-game" className="hover:text-gray-300">Adicionar Jogo</Link>
                             <Link to="/profile" className="hover:text-gray-300">Meu Perfil</Link>
                             <button
                                 onClick={handleLogout}

@@ -12,7 +12,7 @@ import com.gamereviews.model.Game;
 public interface GameRepository extends JpaRepository<Game, Long> {
     Optional<Game> findByTitle(String title);
 
-    List<Game> findByGenreContainingIgnoreCase(String genre);
+    List<Game> findByGenreIgnoreCase(String genre);
 
     List<Game> findByTitleContainingIgnoreCase(String title);
 }
