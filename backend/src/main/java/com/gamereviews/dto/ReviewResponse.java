@@ -1,4 +1,3 @@
-
 package com.gamereviews.dto;
 
 import java.time.LocalDateTime;
@@ -24,7 +23,7 @@ public class ReviewResponse {
         this.rating = review.getRating();
         this.comment = review.getComment();
         this.username = review.getUser().getUsername();
-        //this.gameName = review.getGame().getName();
+        this.gameName = review.getGame().getTitle();
         this.gameId = review.getGame().getId();
         this.userId = review.getUser().getId();
         this.createdAt = review.getCreatedAt();

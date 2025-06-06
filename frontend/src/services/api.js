@@ -10,7 +10,7 @@ const apiClient = axios.create({
 const getUserIdFromToken = (token) => {
     try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        return payload.sub || payload.userId || payload.id;
+        return payload.userId || payload.sub || payload.id;
     } catch (error) {
         console.error('Error decoding token:', error);
         return null;
@@ -30,15 +30,15 @@ const withAuth = (token) => {
 
 export const api = {
     // Games
+    getGames: () => apiClient.get('/games').then(res => res.data),
     getAllGames: () => apiClient.get('/games').then(res => res.data),
-    getGames: () => apiClient.get('/games').then(res => res.data), // Alias for compatibility
     getGame: (id) => apiClient.get(`/games/${id}`).then(res => res.data),
-    getGameById: (id) => apiClient.get(`/games/${id}`).then(res => res.data), // Alias
-    createGame: (game, token) => apiClient.post('/games', game, withAuth(token)).then(res => res.data),
-    createGameComplete: (gameData, token) => apiClient.post('/games', gameData, withAuth(token)).then(res => res.data),
-    searchGames: (title) => apiClient.get(`/games/search?title=${encodeURIComponent(title)}`).then(res => res.data),
-    searchGamesByTitle: (title) => apiClient.get(`/games/search?title=${encodeURIComponent(title)}`).then(res => res.data),
-    getGamesByGenre: (genre) => apiClient.get(`/games/genre/${encodeURIComponent(genre)}`).then(res => res.data),
+    createGame: (game) => apiClient.post('/games', game).then(res => res.data),
+    createGameComplete: (gameData, token) =>
+        apiClient.post('/games', gameData, withAuth(token)).then(res => res.data),
+    searchGames: (title) => apiClient.get(`/games/search?title=${title}`).then(res => res.data),
+    searchGamesByTitle: (title) => apiClient.get(`/games/search?title=${title}`).then(res => res.data),
+    getGamesByGenre: (genre) => apiClient.get(`/games/genre/${genre}`).then(res => res.data),
 
     // Users
     register: (userData) => apiClient.post('/users/register', userData),
@@ -47,7 +47,7 @@ export const api = {
 
     // Reviews
     getReviews: (gameId) => apiClient.get(`/games/${gameId}/reviews`).then(res => res.data),
-    getAllReviews: () => apiClient.get('/reviews'),
+    getAllReviews: () => apiClient.get('/reviews').then(res => res.data),
     createReview: (reviewRequest, token) =>
         apiClient.post('/reviews', reviewRequest, withAuth(token)).then(res => res.data),
     getUserReviews: (userId) => apiClient.get(`/reviews/user/${userId}`),

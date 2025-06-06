@@ -30,7 +30,7 @@ const AddReview = () => {
 
     const loadGames = async () => {
         try {
-            const gamesData = await api.getAllGames()
+            const gamesData = await api.getGames()
             setGames(gamesData)
         } catch (err) {
             console.error('Error loading games:', err)
@@ -40,7 +40,7 @@ const AddReview = () => {
 
     const searchGames = async (term) => {
         try {
-            const gamesData = await api.searchGamesByTitle(term)
+            const gamesData = await api.searchGames(term)
             setGames(gamesData)
         } catch (err) {
             console.error('Error searching games:', err)
@@ -67,15 +67,25 @@ const AddReview = () => {
             return
         }
 
+        if (!formData.reviewText.trim() || formData.reviewText.length < 10) {
+            setError('Review text must be at least 10 characters long')
+            return
+        }
+
         setLoading(true)
 
         try {
             const token = localStorage.getItem('token')
+            if (!token) {
+                setError('Please log in to create a review')
+                setLoading(false)
+                return
+            }
 
             const reviewRequest = {
                 rating: parseInt(formData.rating),
                 comment: formData.reviewText,
-                gameId: formData.gameId
+                gameId: parseInt(formData.gameId)
             }
 
             await api.createReview(reviewRequest, token)
@@ -85,7 +95,10 @@ const AddReview = () => {
             navigate('/')
         } catch (err) {
             setLoading(false)
-            setError(err.response?.data?.message || 'Erro ao criar avaliação')
+            const errorMessage = err.response?.data?.message ||
+                err.response?.data?.error ||
+                'Erro ao criar avaliação'
+            setError(errorMessage)
             console.error('Erro ao criar avaliação:', err)
         }
     }

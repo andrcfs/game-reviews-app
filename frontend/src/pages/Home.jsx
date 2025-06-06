@@ -9,13 +9,17 @@ const Home = () => {
     useEffect(() => {
         const fetchReviews = async () => {
             try {
-                const response = await api.getAllReviews()
-                setReviews(response.data)
+                console.log('Fetching reviews...')
+                const data = await api.getAllReviews()
+                console.log('API response:', data)
+
+                // The response is already unwrapped by the API function
+                setReviews(data)
                 setLoading(false)
             } catch (err) {
-                setError('Falha ao carregar avaliações')
+                console.error('Error fetching reviews:', err)
+                setError('Falha ao carregar avaliações: ' + (err.message || 'Erro desconhecido'))
                 setLoading(false)
-                console.error('Erro ao buscar avaliações:', err)
             }
         }
 
@@ -30,36 +34,51 @@ const Home = () => {
         return <div className="text-center text-red-500 py-10">{error}</div>
     }
 
+    if (!reviews || reviews.length === 0) {
+        return <div className="text-center py-10">Nenhuma avaliação encontrada.</div>
+    }
+
     return (
         <div>
             <h1 className="text-3xl font-bold mb-6 text-center">Avaliações Recentes</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {reviews.map(review => (
-                    <div key={review._id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                        <div className="flex justify-between items-start">
-                            <h2 className="text-xl font-semibold mb-2">{review.gameTitle}</h2>
-                            <div className="flex items-center bg-blue-500 text-white px-2 py-1 rounded">
-                                <span className="font-bold">{review.rating}</span>/5
+                {reviews.map((review, index) => {
+                    const key = review.id || `review-${index}`
+
+                    return (
+                        <div key={key} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                            <div className="flex justify-between items-start">
+                                <h2 className="text-xl font-semibold mb-2">
+                                    {review.gameName || 'Título não disponível'}
+                                </h2>
+                                <div className="flex items-center bg-blue-500 text-white px-2 py-1 rounded">
+                                    <span className="font-bold">{review.rating || '?'}</span>/5
+                                </div>
+                            </div>
+
+                            <div className="mb-4">
+                                <img
+                                    src="https://via.placeholder.com/300x150?text=Game+Image"
+                                    alt={review.gameName || 'Game image'}
+                                    className="w-full h-40 object-cover rounded my-3"
+                                    onError={(e) => {
+                                        e.target.src = 'https://via.placeholder.com/300x150?text=Image+Error'
+                                    }}
+                                />
+                            </div>
+
+                            <p className="text-gray-700 mb-4">{review.comment || 'Sem texto de avaliação'}</p>
+
+                            <div className="flex justify-between text-sm text-gray-500">
+                                <span>Por: {review.username || 'Usuário desconhecido'}</span>
+                                <span>
+                                    {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : 'Data desconhecida'}
+                                </span>
                             </div>
                         </div>
-
-                        <div className="mb-4">
-                            <img
-                                src={review.gameImage || 'https://via.placeholder.com/300x150?text=Game+Image'}
-                                alt={review.gameTitle}
-                                className="w-full h-40 object-cover rounded my-3"
-                            />
-                        </div>
-
-                        <p className="text-gray-700 mb-4">{review.reviewText}</p>
-
-                        <div className="flex justify-between text-sm text-gray-500">
-                            <span>Por: {review.user.username}</span>
-                            <span>{new Date(review.createdAt).toLocaleDateString()}</span>
-                        </div>
-                    </div>
-                ))}
+                    )
+                })}
             </div>
         </div>
     )
